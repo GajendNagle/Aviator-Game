@@ -32,7 +32,7 @@ public partial class SignIn : System.Web.UI.Page
             {
                 sc = true;
                 msg = ds.Tables[0].Rows[0]["msg"].ToString();
-                Response.Redirect("Aviator-3.html", false);
+                Response.Redirect("Aviator.html", false);
                 Context.ApplicationInstance.CompleteRequest();
                 Context.Response.Cookies["LoginID"].Value = ds.Tables[0].Rows[0]["LoginID"].ToString();
                 //Context.Response.Cookies["WBlnc"].Value = ds.Tables[0].Rows[0]["WBlnc"].ToString();
