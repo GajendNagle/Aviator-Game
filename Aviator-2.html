@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aviator Game</title>
+    <style>
+        body {
+            background: #0b0b0b;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        #game-container {
+            height: 250px;
+            background: #111;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #plane {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            width: 60px;
+            transition: left 0.05s linear;
+        }
+
+        #multiplier {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        #crash-msg {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            color: red;
+            display: none;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #222;
+            align-items: center;
+        }
+
+        input, button {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+        }
+
+            button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+        #info-panel {
+            display: flex;
+            gap: 30px;
+            padding: 15px;
+            font-size: 16px;
+            background: #111;
+        }
+
+        #history {
+            padding: 10px 15px;
+            background: #111;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-entry {
+            margin-bottom: 6px;
+        }
+
+        .win {
+            color: #00ff00;
+        }
+
+        .loss {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="multiplier">1.00x</div>
+        <div id="crash-msg">💥 Crashed!</div>
+        <img id="plane" src="https://cdn-icons-png.flaticon.com/512/616/616554.png" alt="Plane">
+    </div>
+
+    <div id="controls">
+        <input type="number" id="betInput" placeholder="Enter Bet Amount" min="1" value="10">
+        <button id="placeBetBtn">Place Bet</button>
+        <button id="cashoutBtn" disabled>Cashout</button>
+        <button id="cancelBtn" disabled>Cancel</button>
+    </div>
+
+    <div id="info-panel">
+        <div><strong>Balance:</strong> $<span id="balance">1000.00</span></div>
+        <div><strong>Status:</strong> <span id="status">Waiting for next round...</span></div>
+    </div>
+
+    <div id="history">
+        <strong>History:</strong>
+        <div id="history-list"></div>
+    </div>
+
+    <!-- Sounds -->
+    <audio id="cashoutSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="crashSound" src="https://www.soundjay.com/button/beep-10.wav"></audio>
+    <audio id="betSound" src="https://www.soundjay.com/button/beep-03.wav"></audio>
+
+    <script>
+        let balance = 1000;
+        let betAmount = 0;
+        let multiplier = 1.00;
+        let crashed = false;
+        let placedBet = false;
+        let cashedOut = false;
+        let interval = null;
+        let position = 0;
+        let autoRestartDelay = 3000;
+
+        const plane = document.getElementById("plane");
+        const multiplierDisplay = document.getElementById("multiplier");
+        const crashDisplay = document.getElementById("crash-msg");
+        const statusText = document.getElementById("status");
+        const balanceEl = document.getElementById("balance");
+        const historyList = document.getElementById("history-list");
+
+        const betInput = document.getElementById("betInput");
+        const placeBetBtn = document.getElementById("placeBetBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const cashoutBtn = document.getElementById("cashoutBtn");
+
+        const cashoutSound = document.getElementById("cashoutSound");
+        const crashSound = document.getElementById("crashSound");
+        const betSound = document.getElementById("betSound");
+
+        placeBetBtn.onclick = () => {
+            betAmount = parseFloat(betInput.value);
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
+                alert("Invalid or insufficient balance.");
+                return;
+            }
+            placedBet = true;
+            cashedOut = false;
+            placeBetBtn.disabled = true;
+            cancelBtn.disabled = false;
+            cashoutBtn.disabled = false;
+            statusText.textContent = "Bet placed.";
+            betSound.play();
+        };
+
+        cancelBtn.onclick = () => {
+            placedBet = false;
+            placeBetBtn.disabled = false;
+            cancelBtn.disabled = true;
+            cashoutBtn.disabled = true;
+            statusText.textContent = "Bet canceled.";
+        };
+
+        cashoutBtn.onclick = () => {
+            if (placedBet && !crashed && !cashedOut) {
+                const win = (betAmount * multiplier);
+                balance += win;
+                balanceEl.textContent = balance.toFixed(2);
+                addHistory(true, multiplier, win);
+                cashedOut = true;
+                placedBet = false;
+                placeBetBtn.disabled = false;
+                cancelBtn.disabled = true;
+                cashoutBtn.disabled = true;
+                statusText.textContent = `Cashed out @ ${multiplier.toFixed(2)}x - Won $${win.toFixed(2)}`;
+                cashoutSound.play();
+            }
+        };
+
+        function startGame() {
+            resetUI();
+            multiplier = 1.00;
+            position = 0;
+            crashed = false;
+            cashedOut = false;
+            crashDisplay.style.display = "none";
+            multiplierDisplay.textContent = multiplier.toFixed(2) + "x";
+            plane.style.left = "0px";
+
+            interval = setInterval(() => {
+                multiplier += 0.05;
+                multiplier = parseFloat(multiplier.toFixed(2));
+                multiplierDisplay.textContent = multiplier + "x";
+                position += 6;
+                plane.style.left = position + "px";
+
+                const randomCrash = Math.random() < 0.01 || position > window.innerWidth - 100;
+                if (randomCrash && !crashed) crash();
+            }, 100);
+        }
+
+        function crash() {
+            crashed = true;
+            clearInterval(interval);
+            crashDisplay.style.display = "block";
+            crashSound.play();
+
+            if (placedBet && !cashedOut) {
+                balance -= betAmount;
+                balanceEl.textContent = balance.toFixed(2);
+                statusText.textContent = `Crashed @ ${multiplier.toFixed(2)}x - Lost $${betAmount.toFixed(2)}`;
+                addHistory(false, multiplier, betAmount);
+            }
+
+            placedBet = false;
+            placeBetBtn.disabled = false;
+            cancelBtn.disabled = true;
+            cashoutBtn.disabled = true;
+
+            setTimeout(() => {
+                statusText.textContent = "Starting new round...";
+                startGame();
+            }, autoRestartDelay);
+        }
+
+        function resetUI() {
+            multiplierDisplay.textContent = "1.00x";
+            plane.style.left = "0px";
+            crashDisplay.style.display = "none";
+        }
+
+        function addHistory(won, mult, amount) {
+            const entry = document.createElement("div");
+            entry.className = `history-entry ${won ? 'win' : 'loss'}`;
+            entry.textContent = `${won ? 'Win' : 'Loss'} @ ${mult.toFixed(2)}x - $${amount.toFixed(2)}`;
+            historyList.prepend(entry);
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

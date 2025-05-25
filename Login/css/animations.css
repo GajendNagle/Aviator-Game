@@ -1,0 +1,209 @@
+﻿/* Airplane Animation */
+.airplane-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.airplane {
+    position: absolute;
+    width: 100px;
+    height: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='120' height='120' fill='none' stroke='%23ff4d4d' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    filter: drop-shadow(0 0 8px rgba(255, 77, 77, 0.6));
+    animation: flying 60s linear infinite;
+    transform: scale(0.8);
+}
+
+@keyframes flying {
+    0% {
+        top: 80%;
+        left: -100px;
+        transform: rotate(10deg) scale(0.8);
+    }
+
+    25% {
+        top: 40%;
+        left: 30%;
+        transform: rotate(-5deg) scale(0.8);
+    }
+
+    50% {
+        top: 20%;
+        left: 60%;
+        transform: rotate(5deg) scale(0.8);
+    }
+
+    75% {
+        top: 60%;
+        left: 80%;
+        transform: rotate(-10deg) scale(0.8);
+    }
+
+    100% {
+        top: 80%;
+        left: 110%;
+        transform: rotate(0deg) scale(0.8);
+    }
+}
+
+/* Form animations */
+.form-control {
+    transition: all 0.3s ease-in-out;
+}
+
+    .form-control:focus {
+        transform: translateY(-2px);
+    }
+
+.btn-login {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-login::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+
+    .btn-login:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* Logo animations */
+.logo-icon {
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 77, 77, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
+    }
+}
+
+/* Form feedback animations */
+.form-control.is-invalid {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+/* Button hover effect */
+.btn-social {
+    transition: all 0.3s ease;
+}
+
+    .btn-social:hover {
+        transform: translateY(-2px);
+    }
+
+/* Page load animations */
+.login-container {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form elements appear with slight delay */
+form .form-group:nth-child(1) {
+    animation: slideIn 0.5s ease-out 0.2s both;
+}
+
+form .form-group:nth-child(2) {
+    animation: slideIn 0.5s ease-out 0.3s both;
+}
+
+form .row {
+    animation: slideIn 0.5s ease-out 0.4s both;
+}
+
+form .btn-login {
+    animation: slideIn 0.5s ease-out 0.5s both;
+}
+
+form .divider,
+form .social-login,
+form .signup-text {
+    animation: slideIn 0.5s ease-out 0.6s both;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}body {
+}
